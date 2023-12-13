@@ -1,0 +1,19 @@
+USE [projekt]
+GO
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[DIMCarrier](
+	[CarrierKey] [bigint] IDENTITY(1,1) PRIMARY KEY,
+	[carrier_id] [bigint] NULL,
+	[carrier_name] [varchar](50) NULL,
+	[address] [varchar](200) NULL,
+	[tax_id] [bigint] NULL,
+	[contact_person] [varchar](100) NULL,
+	[start_date] [datetime] NULL,
+	[end_date] [datetime] NULL,
+) ON [PRIMARY]
+GO

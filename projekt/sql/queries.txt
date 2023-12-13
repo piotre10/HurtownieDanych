@@ -1,0 +1,41 @@
+-- Query 1
+SELECT t.transactionID, t.CustomerKey, t.CarrierKey, dc.carrier_id, dc.carrier_name, t.amount, t.amount / t.daily_amount as daily_percentage from 
+(SELECT *, sum(amount) OVER(PARTITION BY DATETRUNC(day, date)) as daily_amount
+from fact_sales) t 
+JOIN
+DIMCarrier dc ON t.CarrierKey = dc.CarrierKey
+
+-- Query 2
+SELECT 
+	t.date_month, 
+	dc.carrier_id,
+	sum(t.amount) as carrier_total_month_sales,
+	STDEV(t.amount) as carrier_month_stddev,
+	min(t.amount) as min_carrier_sale,
+	max(t.amount) as max_carrier_sale
+from 
+(SELECT *, DATETRUNC(month, fs.date) as date_month from fact_sales fs) t
+JOIN 
+DIMCarrier dc ON t.CarrierKey = dc.CarrierKey
+GROUP BY
+t.date_month, dc.carrier_id
+
+-- Query 3
+SELECT
+	j.date_month, j.carrier_id, j.carrier_name, j.carrier_total_month_sales, 
+	j.carrier_total_month_sales / sum(j.carrier_total_month_sales) OVER(PARTITION BY j.date_month) as carrier_sales_percentage
+FROM (
+SELECT 
+	t.date_month, 
+	dc.carrier_id,
+	dc.carrier_name,
+	sum(t.amount) as carrier_total_month_sales,
+	STDEV(t.amount) as carrier_month_stddev,
+	min(t.amount) as min_carrier_sale,
+	max(t.amount) as max_carrier_sale
+from 
+(SELECT *, DATETRUNC(month, fs.date) as date_month from fact_sales fs) t
+JOIN 
+DIMCarrier dc ON t.CarrierKey = dc.CarrierKey
+GROUP BY
+t.date_month, dc.carrier_id, dc.carrier_name) j
